@@ -10,27 +10,39 @@ namespace FactoryAPI.Controllers
     public class ItemsController : ControllerBase
     {
         private readonly IItemsRepository _itemRepository;
-
         public ItemsController(IItemsRepository itemRepository)
         {
+            //dependency injection
             _itemRepository = itemRepository;
         }
 
         // Create a new item
         [HttpPost]
-        [ProducesResponseType(200)]
+        [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         public async Task<ActionResult> CreateItem([FromBody] Item item)
         {
-            if(!ModelState.IsValid)
+            //check item validation
+            if (item.Name.Length > 50)
+            {
+                ModelState.AddModelError("Error", "Length of 'Name' property should not exceed 50 characters");
+            }
+
+            if (item.Description.Length > 100)
+            {
+                ModelState.AddModelError("Error", "Length of 'Description' property should not exceed 100 characters");
+            }
+
+            if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
             var result = await _itemRepository.Add(item);
 
             if(!result)
             {
-                ModelState.AddModelError("", "Failed while adding the item");
+                //if there are no changes in database after adding (Add must have failed)
+                ModelState.AddModelError("Error", "Failed while adding the item");
                 return StatusCode(500, ModelState);
             }
 
@@ -68,6 +80,17 @@ namespace FactoryAPI.Controllers
         [ProducesResponseType(500)]
         public async Task<ActionResult> UpdateItem([FromBody] Item item)
         {
+            if (item.Name.Length > 50)
+            {
+                ModelState.AddModelError("Error", "Length of 'Name' property should not exceed 50 characters");
+            }
+
+            if (item.Description.Length > 100)
+            {
+                ModelState.AddModelError("Error", "Length of 'Description' property should not exceed 100 characters");
+            }
+
+            //check item validation
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -75,7 +98,7 @@ namespace FactoryAPI.Controllers
 
             if (!result)
             {
-                ModelState.AddModelError("", "Failed while updating the item");
+                ModelState.AddModelError("Error", "Failed while updating the item");
                 return StatusCode(500, ModelState);
             }
 
@@ -96,7 +119,7 @@ namespace FactoryAPI.Controllers
 
             if(!result)
             {
-                ModelState.AddModelError("", "Failed at deleting the item");
+                ModelState.AddModelError("Error", "Failed at deleting the item");
                 return StatusCode(500, ModelState);
             }
 

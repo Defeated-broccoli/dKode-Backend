@@ -13,6 +13,7 @@ namespace FactoryAPI.Repositories
         {
             this._context = context;
         }
+
         public async Task<bool> Add(Item item)
         {
             await _context.Items.AddAsync(item);
@@ -42,6 +43,7 @@ namespace FactoryAPI.Repositories
 
         public async Task<bool> Save()
         {
+            //returns true only if changes were made to database
             return await _context.SaveChangesAsync() > 0;
         }
 
